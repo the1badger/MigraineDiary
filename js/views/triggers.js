@@ -73,7 +73,7 @@ function buildDetail(detail, e, report) {
     return { label: l === 0 ? 'same day' : `${l} day${l > 1 ? 's' : ''} later`, rate: x.nExp ? x.rateExp : null, n: x.nExp, sufficient: x.sufficient };
   });
   detail.appendChild(lagChart({ title: `Attack rate after ${e.label} at each lag`, bars: lagBars, baseline: report.baselineRate }));
-  detail.appendChild(p('Bars show how often an attack started that many days after a day with this exposure; the dashed line is your usual daily rate. n is the number of exposure days behind each bar; pale bars have too few to judge.', 'chart-caption'));
+  detail.appendChild(p(`Bars show how often an attack started that many days after a day with this exposure; the dashed line is your usual daily rate (${formatPct(report.baselineRate)}). n is the number of exposure days behind each bar; pale bars have too few to judge.`, 'chart-caption'));
 
   const table = h('table', null,
     h('thead', null, h('tr', null, h('th', null, 'Lag'), h('th', null, 'After exposure'), h('th', null, 'Otherwise'), h('th', null, 'Fluke chance'))),
@@ -148,7 +148,8 @@ function resultWords(r) {
 
 function planRow(exposure, today) {
   const date = h('input', { type: 'date', value: addDays(today, 1), 'aria-label': `Challenge date for ${exposure}` });
-  return h('div', { class: 'add-row' }, date,
+  return h('div', { class: 'plan-row' },
+    h('label', { class: 'stacked' }, h('span', null, `Challenge day for ${exposure}`), date),
     h('button', { class: 'btn', type: 'button', onclick: async () => {
       if (!date.value) return;
       const challenges = [...state.settings.challenges, { id: uuid(), exposure, date: date.value, cleanMorning: true }];

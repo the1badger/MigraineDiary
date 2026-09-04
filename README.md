@@ -15,6 +15,16 @@ A private, offline daily journal for people with migraine. Tick a few boxes once
 4. Open **Trends** for the monthly chart, the medication-overuse line and the attack profile.
 5. **Settings → Delete everything** clears the demo before you start logging for real.
 
+## Screenshots
+
+| Today | Calendar | Trends |
+|---|---|---|
+| ![Today screen](docs/today.png) | ![Calendar heat-map](docs/calendar.png) | ![Trends](docs/trends.png) |
+
+| Triggers | Trigger detail | Attack sheet (dark theme) |
+|---|---|---|
+| ![Triggers](docs/triggers.png) | ![Trigger detail with lag chart](docs/triggers-detail.png) | ![Attack sheet in the dark theme](docs/attack-dark.png) |
+
 ## Running it
 
 The app is a static folder. Any web server will do; service workers need `http://localhost` or `https://`, so opening `index.html` straight from the file system will run the app but will not install it.

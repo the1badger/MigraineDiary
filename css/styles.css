@@ -299,7 +299,11 @@ label.stacked > span { display: block; margin-bottom: 0.3rem; }
 .chart .dot { fill: var(--accent); }
 .chart .label { fill: var(--text); font-weight: 600; }
 .chart .label.on-bar { fill: var(--on-accent); }
+.chart .halo { paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; }
 .chart-caption { font-size: 0.85rem; color: var(--text-muted); margin: 0 0 1rem; }
+.plan-row { display: flex; flex-direction: column; gap: 0.25rem; margin: 0.5rem 0 1rem; }
+.plan-row .stacked { margin: 0; }
+.plan-row .btn { align-self: flex-start; }
 
 /* Stats and cards */
 .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.75rem 1rem; margin: 0.5rem 0 1rem; }

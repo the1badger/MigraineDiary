@@ -77,7 +77,7 @@ export function lineChart({ points, thresholds = [], xLabels = [], title, yMax: 
   }
   for (const t of thresholds) {
     svg.appendChild(s('line', { class: 'threshold', x1: padL, x2: W - padR, y1: y(t.y), y2: y(t.y) }));
-    svg.appendChild(s('text', { x: W - padR, y: y(t.y) - 3, 'text-anchor': 'end', 'font-size': 10 }, t.label));
+    svg.appendChild(s('text', { class: 'halo', x: W - padR, y: y(t.y) - 3, 'text-anchor': 'end', 'font-size': 10 }, t.label));
   }
   const d = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${x(i).toFixed(1)},${y(p.y).toFixed(1)}`).join(' ');
   svg.appendChild(s('path', { class: 'line', d }));
@@ -106,7 +106,6 @@ export function lagChart({ bars, baseline, title }) {
   }
   if (baseline != null) {
     svg.appendChild(s('line', { class: 'baseline', x1: padL, x2: W - padR, y1: y(baseline), y2: y(baseline) }));
-    svg.appendChild(s('text', { x: W - padR, y: y(baseline) - 3, 'text-anchor': 'end', 'font-size': 10 }, `usual rate ${Math.round(baseline * 100)}%`));
   }
   bars.forEach((b, i) => {
     const x0 = padL + i * bw + bw * 0.2, w = bw * 0.6;
