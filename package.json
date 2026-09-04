@@ -1,0 +1,12 @@
+{
+  "name": "migraine-diary",
+  "version": "1.0.0",
+  "description": "Local-first migraine diary PWA with lagged trigger analysis. No build step; package.json exists only to run the tests.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/",
+    "serve": "python -m http.server 8000"
+  },
+  "license": "MIT"
+}
