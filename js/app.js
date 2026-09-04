@@ -147,6 +147,7 @@ async function boot() {
   on('settingschange', () => { applyTheme(); renderBanners(); scheduleReminder(); });
   on('daychange', () => renderBanners());
   window.addEventListener('hashchange', route);
+  window.addEventListener('app:rerender', route);
   if (!location.hash) location.replace('#/today');
   route();
   renderBanners();
