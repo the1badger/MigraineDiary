@@ -143,6 +143,16 @@ async function boot() {
   if (state.settings.persisted == null) {
     store.requestPersist().then(result => { if (result != null) saveSettings({ persisted: result }); });
   }
+  // ?demo=1 loads the demo diary into an EMPTY database (used for screenshots and quick trials).
+  if (/[?&]demo=1/.test(location.search) && state.days.size === 0) {
+    const { generateDemo } = await import('./demo.js');
+    const { addDays } = await import('./dates.js');
+    const { replaceAll } = await import('./state.js');
+    const { days, settings } = generateDemo({ endDate: addDays(todayISO(), -1) });
+    settings.lastBackupAt = new Date().toISOString();
+    await replaceAll(days, settings);
+    history.replaceState(null, '', location.pathname + location.hash);
+  }
   on('savestate', e => setSaveIndicator(e.detail.state, e.detail.err));
   on('settingschange', () => { applyTheme(); renderBanners(); scheduleReminder(); });
   on('daychange', () => renderBanners());

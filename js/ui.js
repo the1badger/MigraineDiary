@@ -203,3 +203,22 @@ export function isIOS() {
 export function isStandalone() {
   return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
 }
+
+/** Text prompt dialog. Resolves with the trimmed string, or null if cancelled. */
+export function promptDialog({ title, label, value = '', confirmLabel = 'Save', maxlength = 60 }) {
+  const dlg = document.getElementById('dialog');
+  return new Promise(resolve => {
+    const input = h('input', { type: 'text', value, maxlength, autocomplete: 'off', 'aria-label': label });
+    const ok = h('button', { class: 'btn primary', type: 'button' }, confirmLabel);
+    const cancel = h('button', { class: 'btn', type: 'button' }, 'Cancel');
+    replaceChildren(dlg, h('h2', null, title), h('label', { class: 'stacked' }, h('span', null, label), input), h('div', { class: 'btn-row' }, cancel, ok));
+    const done = v => { dlg.close(); resolve(v); };
+    ok.onclick = () => done(input.value.trim() || null);
+    cancel.onclick = () => done(null);
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); ok.click(); } });
+    dlg.oncancel = e => { e.preventDefault(); done(null); };
+    dlg.showModal();
+    input.focus();
+    input.select();
+  });
+}
