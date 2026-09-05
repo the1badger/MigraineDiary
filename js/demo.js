@@ -101,6 +101,7 @@ export function generateDemo({
       smokeHaze: chance(0.05),
       mouldSmell: chance(0.06),
       weatherChange: chance(0.15),
+      brightLight: chance(0.2),
       custom: { [trigger]: !!trig, [decoy]: !!dec, 'red wine': alcohol >= 2 && chance(0.6) },
     };
 

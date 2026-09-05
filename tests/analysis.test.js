@@ -282,7 +282,7 @@ test('exercise types, eating out, gluten and supplements are analysed, with "any
   const defs = exposureDefinitions(settings);
   const keys = defs.map(d => d.key);
   for (const k of ['exerciseLight', 'exerciseSport', 'exerciseResistance', 'exerciseHIIT', 'ateOutThai', 'ateOutVietnamese', 'ateOutIndian',
-    'ateOutPizza', 'ateOutOther', 'glutenContamination', 'suppMagnesium', 'suppMultivitamin', 'suppOmega3', 'ateOutAny', 'exerciseAny']) {
+    'ateOutPizza', 'ateOutOther', 'glutenContamination', 'suppMagnesium', 'suppMultivitamin', 'suppOmega3', 'ateOutAny', 'exerciseAny', 'brightLight']) {
     assert.ok(keys.includes(k), `${k} should be analysed`);
   }
   assert.ok(!keys.includes('exerciseHard'), 'hard exercise is hidden by default');

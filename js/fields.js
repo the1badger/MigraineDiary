@@ -68,6 +68,8 @@ export const FIELDS = [
   { key: 'mouldSmell', label: 'Musty or mouldy smell', group: 'env', type: 'bool', analysisLabel: () => 'Mould smell' },
   { key: 'weatherChange', label: 'Weather change', hint: 'storm, pressure drop, heat', group: 'env', type: 'bool',
     analysisLabel: () => 'Weather change' },
+  { key: 'brightLight', label: 'Exposed to bright or fluorescent lighting', hint: 'office strip lights, glare, flicker', group: 'env', type: 'bool',
+    analysisLabel: () => 'Bright or fluorescent lighting' },
 
   // Supplements (shown under Medicines and notes; analysed like any other exposure, so a
   // protective effect shows up as "fewer attacks")

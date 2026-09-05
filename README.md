@@ -86,7 +86,7 @@ The Help screen inside the app explains it in full. In short:
 - Trends: monthly migraine days with the ±2√M noise band; rolling 30-day acute-medication days against the 10-day (triptans, combination painkillers) and 15-day (simple painkillers) overuse lines; attack profile; logging completeness.
 - Challenge tests: for the top suspects the app offers the provocation protocol (a clean morning, a normal portion, note attacks within 24 h, repeat 5–6 times at least 4 days apart) and compares attack rates after challenge days with the baseline.
 
-Built-in tick boxes include exercise type (light or moderate, sport, resistance, HIIT), eating out (Thai, Vietnamese, Indian, pizza, other) with possible gluten contamination, and supplements (magnesium, multivitamin, omega 3). Supplements are analysed like any other exposure, so a protective effect shows up as "fewer attacks". Unticked tick boxes on a logged day count as "no"; numbers left blank are treated as unanswered and excluded, never as zero. Unlogged days are excluded.
+Built-in tick boxes include exercise type (light or moderate, sport, resistance, HIIT), eating out (Thai, Vietnamese, Indian, pizza, other) with possible gluten contamination, supplements (magnesium, multivitamin, omega 3), and bright or fluorescent lighting. Supplements are analysed like any other exposure, so a protective effect shows up as "fewer attacks". Unticked tick boxes on a logged day count as "no"; numbers left blank are treated as unanswered and excluded, never as zero. Unlogged days are excluded.
 
 ## Development
 
