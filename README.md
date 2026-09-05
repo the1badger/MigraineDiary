@@ -39,9 +39,11 @@ then open <http://localhost:8000>.
 
 ### Hosting on GitHub Pages (free)
 
-1. Create a repository on GitHub and push this folder to it (`git remote add origin …`, `git push -u origin main`).
+The source lives at <https://github.com/the1badger/MigraineDiary>.
+
+1. Push `main` to that repository (`git push -u origin main`).
 2. In the repository's **Settings → Pages**, choose *Deploy from a branch*, branch `main`, folder `/ (root)`.
-3. After a minute the app is at `https://<your-name>.github.io/<repository>/`.
+3. After a minute the app is at <https://the1badger.github.io/MigraineDiary/>. Every later push to `main` redeploys it; installed copies show "Update available – reload" once `VERSION` in `sw.js` has been bumped.
 
 Your diary never goes to GitHub or anywhere else: the host only serves the app's files. The data lives in the browser's own database on each device.
 
