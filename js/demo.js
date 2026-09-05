@@ -25,7 +25,7 @@ export const DEMO_DECOY = 'aged cheese';
 // result about a third of the time (six tests per exposure at p < 0.10), so the seed
 // was chosen so that the decoy reads "no signal" and the trigger is clearly strongest
 // two days later. Other seeds are exercised by the tests.
-export const DEMO_SEED = 4;
+export const DEMO_SEED = 1;
 
 /**
  * generateDemo(options) -> { days, settings }
@@ -77,7 +77,20 @@ export function generateDemo({
       wakeTimeShift: chance(0.12),
       stress: Math.min(10, Math.max(0, Math.round(3 + rnd() * 5 + (chance(0.15) ? 3 : 0)))),
       exerciseMinutes: pick([0, 0, 30, 30, 45, 60]),
-      exerciseHard: chance(0.1),
+      exerciseLight: chance(0.35),
+      exerciseSport: chance(0.1),
+      exerciseResistance: chance(0.15),
+      exerciseHIIT: chance(0.08),
+      exerciseHard: false,
+      ateOutThai: chance(0.05),
+      ateOutVietnamese: chance(0.04),
+      ateOutIndian: chance(0.04),
+      ateOutPizza: chance(0.06),
+      ateOutOther: chance(0.08),
+      glutenContamination: chance(0.05),
+      suppMagnesium: chance(0.7),
+      suppMultivitamin: chance(0.5),
+      suppOmega3: chance(0.4),
       mealsSkipped: chance(0.18) ? 1 : 0,
       caffeineServings: pick([1, 2, 2, 3]),
       alcoholDrinks: alcohol,

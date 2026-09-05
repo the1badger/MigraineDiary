@@ -11,7 +11,7 @@
 //   Lag L = exposure on d, outcome on d+L, for L in 0..3.
 //   Windows: exposure on any of the previous 2 (or 3) days, outcome on d.
 
-import { FIELDS, isMigraineDay, acuteMedDay, normaliseDay } from './fields.js';
+import { FIELDS, DERIVED, isMigraineDay, acuteMedDay, normaliseDay } from './fields.js';
 import { addDays, diffDays, monthKey, localMinuteToMs, hoursBetween, dateRange, daysInMonth } from './dates.js';
 
 export const LAGS = [0, 1, 2, 3];
@@ -82,6 +82,11 @@ export function exposureDefinitions(settings) {
     const t = settings.thresholds && settings.thresholds[f.key] != null ? settings.thresholds[f.key] : (f.threshold ? f.threshold.default : null);
     defs.push({ key: f.key, label: f.analysisLabel ? f.analysisLabel(t) : f.label, kind: 'builtin', field: f, threshold: t, group: f.group });
   }
+  for (const d of DERIVED) {
+    const parts = d.of.filter(k => !hidden.has(k)).map(k => FIELDS.find(f => f.key === k)).filter(Boolean);
+    if (parts.length < 2) continue;      // a composite of one box is just that box
+    defs.push({ key: d.key, label: d.label, kind: 'derived', parts, group: d.group });
+  }
   for (const c of settings.customExposures || []) {
     if (c.hidden) continue;
     defs.push({ key: `custom:${c.name}`, label: c.name, kind: 'custom', name: c.name, since: c.since || null, group: c.group || 'food' });
@@ -93,6 +98,9 @@ export function exposureDefinitions(settings) {
 export function exposureValue(day, def) {
   if (!day) return null;
   const ex = day.exposures || {};
+  if (def.kind === 'derived') {
+    return def.parts.some(f => ex[f.key]) ? 1 : 0;
+  }
   if (def.kind === 'custom') {
     if (def.since && day.date < def.since) return null;
     const v = ex.custom ? ex.custom[def.name] : undefined;

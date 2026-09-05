@@ -170,7 +170,12 @@ function exposureGroups(date) {
     const customs = state.settings.customExposures.filter(c => c.group === g.key && !c.hidden);
     if (!fields.length && !customs.length) continue;
     const sec = h('div', { class: 'group' }, h('h2', null, g.label));
-    for (const f of fields) sec.appendChild(control(f, ex[f.key], v => set(f.key, v)));
+    let sub = null;
+    for (const f of fields) {
+      if (f.subgroup && f.subgroup !== sub) sec.appendChild(h('h3', { class: 'subgroup' }, f.subgroup));
+      sub = f.subgroup || null;
+      sec.appendChild(control(f, ex[f.key], v => set(f.key, v)));
+    }
     for (const c of customs) sec.appendChild(tickRow({ label: c.name, checked: !!ex.custom[c.name], onChange: v => setCustom(c.name, v) }));
     frag.appendChild(sec);
   }
@@ -206,6 +211,13 @@ function flagsAndNote(date) {
   for (const flag of DAY_FLAGS) {
     if (hidden.has(flag.key)) continue;
     sec.appendChild(tickRow({ label: flag.label, checked: !!(day && day[flag.key]), onChange: v => updateDay(date, d => { d[flag.key] = v; }) }));
+  }
+  const ex = day ? day.exposures : {};
+  let sub = null;
+  for (const f of FIELDS.filter(f => f.group === 'meds' && !hidden.has(f.key))) {
+    if (f.subgroup && f.subgroup !== sub) sec.appendChild(h('h3', { class: 'subgroup' }, f.subgroup));
+    sub = f.subgroup || null;
+    sec.appendChild(control(f, ex[f.key], v => updateDay(date, d => { d.exposures[f.key] = v; })));
   }
   const note = h('textarea', { rows: 2, placeholder: 'Anything unusual? One line is plenty.', 'aria-label': 'Note', maxlength: 2000 });
   note.value = day ? day.note : '';

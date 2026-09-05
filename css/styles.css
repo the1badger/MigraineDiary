@@ -181,6 +181,7 @@ main:focus { outline: none; }
 .group { margin-top: 1.25rem; }
 .group h2 { font-size: 1.05rem; color: var(--text-muted); font-weight: 600; margin: 0 0 0.25rem; padding-bottom: 0.35rem; border-bottom: 1px solid var(--hairline); }
 .explain { color: var(--text-muted); font-size: 0.9rem; margin: 0.25rem 0 0.6rem; }
+.group h3.subgroup { font-size: 0.9rem; color: var(--text-muted); font-weight: 600; margin: 0.9rem 0 0; }
 
 /* Tick rows */
 .tick {

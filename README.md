@@ -77,14 +77,14 @@ Export a backup every couple of weeks. The app reminds you when the last one is 
 
 The Help screen inside the app explains it in full. In short:
 
-- Each exposure (built-in questions after their cut-offs, plus your own tick boxes) is tested at four lags (same day, 1, 2 and 3 days later) and over the previous 48 and 72 hours, using a two-sided Fisher exact test on the 2×2 table of exposed/unexposed days versus attack/no attack.
+- Each exposure (built-in questions after their cut-offs, your own tick boxes, and two composites: "ate out, any" and "exercise, any type") is tested at four lags (same day, 1, 2 and 3 days later) and over the previous 48 and 72 hours, using a two-sided Fisher exact test on the 2×2 table of exposed/unexposed days versus attack/no attack.
 - Verdicts: p < 0.01 is "clear", 0.01–0.10 "possible", otherwise "no signal". With six tests per exposure, one or two "possible" results are expected by chance alone, and the screen says so.
 - Gates: at least 28 logged days, 5 attacks, and 5 days with and 5 without the exposure; otherwise the screen says how many more are needed.
 - Confounds handled: same-day findings that coincide with early-warning signs are flagged as likely symptoms and ranked lower; attack days are excluded from the exposure counts for lags 1–3; onsets within 48 hours of the previous one count as the same episode; co-occurring exposures are listed for any clear finding; hormonal phase is reported separately when logged.
 - Trends: monthly migraine days with the ±2√M noise band; rolling 30-day acute-medication days against the 10-day (triptans, combination painkillers) and 15-day (simple painkillers) overuse lines; attack profile; logging completeness.
 - Challenge tests: for the top suspects the app offers the provocation protocol (a clean morning, a normal portion, note attacks within 24 h, repeat 5–6 times at least 4 days apart) and compares attack rates after challenge days with the baseline.
 
-Unticked tick boxes on a logged day count as "no"; numbers left blank are treated as unanswered and excluded, never as zero. Unlogged days are excluded.
+Built-in tick boxes include exercise type (light or moderate, sport, resistance, HIIT), eating out (Thai, Vietnamese, Indian, pizza, other) with possible gluten contamination, and supplements (magnesium, multivitamin, omega 3). Supplements are analysed like any other exposure, so a protective effect shows up as "fewer attacks". Unticked tick boxes on a logged day count as "no"; numbers left blank are treated as unanswered and excluded, never as zero. Unlogged days are excluded.
 
 ## Development
 

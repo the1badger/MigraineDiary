@@ -3,14 +3,14 @@
 
 import { state, saveSettings, replaceAll, eraseAll } from '../state.js';
 import { h, p, tickRow, segmented, toast, confirmDialog, infoDialog, promptDialog, plural, isIOS, isStandalone, formatPct } from '../ui.js';
-import { FIELDS, DAY_FLAGS, GROUPS, medClass, defaultSettings } from '../fields.js';
+import { FIELDS, DAY_FLAGS, GROUPS, GROUP_LABELS, medClass, defaultSettings } from '../fields.js';
 import { exportBackup, prepareImport, commitImport } from '../export.js';
 import { generateDemo, DEMO_TRIGGER, DEMO_DECOY } from '../demo.js';
 import { store } from '../store.js';
 import { notificationsSupported, requestPermission, scheduleReminder } from '../reminders.js';
 import { todayISO, addDays, formatMedium, nowWithOffset, diffDays } from '../dates.js';
 
-const GROUP_LABEL = Object.fromEntries(GROUPS.map(g => [g.key, g.label]));
+const GROUP_LABEL = GROUP_LABELS;
 
 function rerender() { window.dispatchEvent(new Event('app:rerender')); }
 
@@ -109,7 +109,9 @@ function builtinSection(s) {
   const sec = h('div', { class: 'group' }, h('h2', null, 'Built-in questions'),
     p('Untick anything you never need; hidden questions leave the Today screen and the analysis. Cycle day and hormonal phase are off until you turn them on.', 'explain'));
   const hidden = new Set(s.hiddenBuiltins);
-  const all = [...FIELDS.map(f => ({ key: f.key, label: f.label + (f.hint ? ` (${f.hint})` : ''), group: GROUP_LABEL[f.group] })), ...DAY_FLAGS.map(f => ({ key: f.key, label: f.label, group: 'Medicines' }))];
+  const all = [...FIELDS.filter(f => f.group !== 'meds').map(f => ({ key: f.key, label: (f.subgroup ? `${f.subgroup}: ` : '') + f.label + (f.hint ? ` (${f.hint})` : ''), group: GROUP_LABEL[f.group] })),
+    ...DAY_FLAGS.map(f => ({ key: f.key, label: f.label, group: GROUP_LABEL.meds })),
+    ...FIELDS.filter(f => f.group === 'meds').map(f => ({ key: f.key, label: `${f.subgroup}: ${f.label}`, group: GROUP_LABEL.meds }))];
   let lastGroup = null;
   for (const f of all) {
     if (f.group !== lastGroup) { sec.appendChild(h('h3', null, f.group)); lastGroup = f.group; }

@@ -276,3 +276,36 @@ test('empty diary produces a calm, valid report', () => {
   assert.deepEqual(report.monthly, []);
   assert.equal(report.medication.level, 'ok');
 });
+
+test('exercise types, eating out, gluten and supplements are analysed, with "any" composites', () => {
+  const settings = defaultSettings();
+  const defs = exposureDefinitions(settings);
+  const keys = defs.map(d => d.key);
+  for (const k of ['exerciseLight', 'exerciseSport', 'exerciseResistance', 'exerciseHIIT', 'ateOutThai', 'ateOutVietnamese', 'ateOutIndian',
+    'ateOutPizza', 'ateOutOther', 'glutenContamination', 'suppMagnesium', 'suppMultivitamin', 'suppOmega3', 'ateOutAny', 'exerciseAny']) {
+    assert.ok(keys.includes(k), `${k} should be analysed`);
+  }
+  assert.ok(!keys.includes('exerciseHard'), 'hard exercise is hidden by default');
+  const anyOut = defs.find(d => d.key === 'ateOutAny');
+  const day = normaliseDay({ date: '2026-01-01', exposures: { ateOutPizza: true } });
+  assert.equal(exposureValue(day, anyOut), 1);
+  assert.equal(exposureValue(normaliseDay({ date: '2026-01-02', exposures: {} }), anyOut), 0);
+  assert.equal(exposureValue(null, anyOut), null);
+  // Hiding all but one of the boxes removes the composite (it would just duplicate that box).
+  settings.hiddenBuiltins = ['ateOutThai', 'ateOutVietnamese', 'ateOutIndian', 'ateOutPizza'];
+  assert.ok(!exposureDefinitions(settings).find(d => d.key === 'ateOutAny'));
+  // A supplement taken on most quiet days and skipped before attacks reads as "fewer attacks".
+  const s2 = defaultSettings();
+  const days = [];
+  for (let i = 0; i < 120; i++) {
+    const date = addDays('2026-01-01', i);
+    const attack = i % 8 === 4;
+    const d = normaliseDay({ date, exposures: { suppMagnesium: !attack && i % 3 !== 0 } });
+    if (attack) d.attacks.push({ id: `a${i}`, start: `${date}T09:00`, peakSeverity: 5 });
+    days.push(d);
+  }
+  const report = analyse(days, s2, { today: addDays('2026-01-01', 119) });
+  const mg = report.exposures.find(e => e.key === 'suppMagnesium');
+  assert.equal(mg.verdict, 'lower');
+  assert.match(mg.headline, /Fewer attacks/);
+});

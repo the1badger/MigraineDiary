@@ -26,8 +26,16 @@ export const FIELDS = [
     threshold: { op: '>=', default: 7 }, analysisLabel: t => `High stress (${t}+ out of 10)` },
   { key: 'exerciseMinutes', label: 'Exercise', hint: 'minutes', group: 'sleep', type: 'number', min: 0, max: 600, step: 15, unit: 'min',
     threshold: { op: '>=', default: 60 }, analysisLabel: t => `Long exercise (${t}+ min)` },
-  { key: 'exerciseHard', label: 'Hard or unusual exercise', group: 'sleep', type: 'bool',
-    analysisLabel: () => 'Hard exercise' },
+  { key: 'exerciseLight', label: 'Light or moderate exercise', hint: 'walk, easy cycle, yoga', group: 'sleep', type: 'bool', subgroup: 'Exercise type',
+    analysisLabel: () => 'Light or moderate exercise' },
+  { key: 'exerciseSport', label: 'Sport', hint: 'a game or match', group: 'sleep', type: 'bool', subgroup: 'Exercise type',
+    analysisLabel: () => 'Sport' },
+  { key: 'exerciseResistance', label: 'Resistance training', hint: 'weights, gym', group: 'sleep', type: 'bool', subgroup: 'Exercise type',
+    analysisLabel: () => 'Resistance training' },
+  { key: 'exerciseHIIT', label: 'HIIT', hint: 'high-intensity intervals', group: 'sleep', type: 'bool', subgroup: 'Exercise type',
+    analysisLabel: () => 'HIIT' },
+  { key: 'exerciseHard', label: 'Hard or unusual exercise', group: 'sleep', type: 'bool', subgroup: 'Exercise type',
+    hiddenByDefault: true, analysisLabel: () => 'Hard exercise' },
   { key: 'cycleDay', label: 'Cycle day', hint: 'day 1 = first day of period', group: 'sleep', type: 'number', min: 1, max: 60, step: 1, unit: '',
     hiddenByDefault: true, noAnalysis: true },
   { key: 'hormonal', label: 'Hormonal', group: 'sleep', type: 'enum', options: [['none', 'None'], ['period', 'Period'], ['ovulation', 'Ovulation']],
@@ -42,6 +50,13 @@ export const FIELDS = [
     threshold: { op: '>=', default: 3 }, analysisLabel: t => `Alcohol (${t}+ drinks)` },
   { key: 'waterLitres', label: 'Water', hint: 'litres', group: 'food', type: 'number', min: 0, max: 6, step: 0.25, unit: 'L',
     threshold: { op: '<', default: 1 }, analysisLabel: t => `Low water (under ${t} L)` },
+  { key: 'ateOutThai', label: 'Thai', group: 'food', type: 'bool', subgroup: 'Ate out', analysisLabel: () => 'Ate out: Thai' },
+  { key: 'ateOutVietnamese', label: 'Vietnamese', group: 'food', type: 'bool', subgroup: 'Ate out', analysisLabel: () => 'Ate out: Vietnamese' },
+  { key: 'ateOutIndian', label: 'Indian', group: 'food', type: 'bool', subgroup: 'Ate out', analysisLabel: () => 'Ate out: Indian' },
+  { key: 'ateOutPizza', label: 'Pizza', group: 'food', type: 'bool', subgroup: 'Ate out', analysisLabel: () => 'Ate out: pizza' },
+  { key: 'ateOutOther', label: 'Other restaurant or takeaway', group: 'food', type: 'bool', subgroup: 'Ate out', analysisLabel: () => 'Ate out: other' },
+  { key: 'glutenContamination', label: 'Possible gluten contamination', hint: 'shared kitchen, unclear ingredients', group: 'food', type: 'bool', subgroup: 'Ate out',
+    analysisLabel: () => 'Possible gluten contamination' },
 
   // Environment and neck
   { key: 'screenHours', label: 'Screen time', hint: 'hours', group: 'env', type: 'number', min: 0, max: 18, step: 1, unit: 'h',
@@ -53,7 +68,25 @@ export const FIELDS = [
   { key: 'mouldSmell', label: 'Musty or mouldy smell', group: 'env', type: 'bool', analysisLabel: () => 'Mould smell' },
   { key: 'weatherChange', label: 'Weather change', hint: 'storm, pressure drop, heat', group: 'env', type: 'bool',
     analysisLabel: () => 'Weather change' },
+
+  // Supplements (shown under Medicines and notes; analysed like any other exposure, so a
+  // protective effect shows up as "fewer attacks")
+  { key: 'suppMagnesium', label: 'Magnesium', group: 'meds', type: 'bool', subgroup: 'Supplements', analysisLabel: () => 'Magnesium supplement' },
+  { key: 'suppMultivitamin', label: 'Multivitamin', group: 'meds', type: 'bool', subgroup: 'Supplements', analysisLabel: () => 'Multivitamin' },
+  { key: 'suppOmega3', label: 'Omega 3', group: 'meds', type: 'bool', subgroup: 'Supplements', analysisLabel: () => 'Omega 3 supplement' },
 ];
+
+/**
+ * Composite exposures: "any of" several tick boxes. They give the analysis enough
+ * exposure days when the individual boxes are ticked only now and then.
+ */
+export const DERIVED = [
+  { key: 'ateOutAny', label: 'Ate out (any)', of: ['ateOutThai', 'ateOutVietnamese', 'ateOutIndian', 'ateOutPizza', 'ateOutOther'], group: 'food' },
+  { key: 'exerciseAny', label: 'Exercise (any type)', of: ['exerciseLight', 'exerciseSport', 'exerciseResistance', 'exerciseHIIT', 'exerciseHard'], group: 'sleep' },
+];
+
+/** Labels for every group, including the one rendered under Medicines and notes. */
+export const GROUP_LABELS = { sleep: 'Sleep and body', food: 'Food and drink', env: 'Environment and neck', meds: 'Medicines and notes' };
 
 export const FIELD_BY_KEY = Object.fromEntries(FIELDS.map(f => [f.key, f]));
 
