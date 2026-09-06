@@ -4,7 +4,9 @@
 import { state, getDay, updateDay, on } from '../state.js';
 import { h, p, tickRow, segmented, countControl, stepper, slider, chips, fieldRow, replaceChildren, toast, confirmDialog, plural } from '../ui.js';
 import { FIELDS, GROUPS, DAY_FLAGS, PRODROME, severityWord, isMigraineDay } from '../fields.js';
-import { todayISO, addDays, formatLong, describeRelative, timeOf } from '../dates.js';
+import { todayISO, addDays, formatLong, describeRelative, timeOf, diffDays, formatShort } from '../dates.js';
+import { getLocation, fetchWeather, describeWeather, MAX_PAST_DAYS } from '../weather.js';
+import { saveSettings } from '../state.js';
 
 const STEPPER_START = { sleepHours: 7, waterLitres: 1.5, screenHours: 4, exerciseMinutes: 30, cycleDay: 1 };
 
@@ -25,11 +27,13 @@ export function renderToday({ date }) {
   root.appendChild(statusEl);
   root.appendChild(prodromeSection(date));
   root.appendChild(exposureGroups(date));
+  root.appendChild(weatherSection(date, today));
   root.appendChild(flagsAndNote(date));
 
-  root.cleanup = on('daychange', e => {
+  const offStatus = on('daychange', e => {
     if (e.detail.date === date || e.detail.date == null) renderStatus(statusEl, date, today);
   });
+  root.cleanup = () => { offStatus(); const w = root.querySelector('.group.weather'); if (w && w.cleanupWeather) w.cleanupWeather(); };
   return root;
 }
 
@@ -200,6 +204,56 @@ function control(f, value, onChange) {
     default:
       return h('div', null, f.label);
   }
+}
+
+/* ---------- Weather ---------- */
+
+function weatherSection(date, today) {
+  const sec = h('div', { class: 'group weather' }, h('h2', null, 'Weather and air'));
+  const body = h('div');
+  sec.appendChild(body);
+  const rel = describeRelative(date, today);
+  const label = rel === 'today' ? "Fetch today's weather" : `Fetch weather for ${rel === 'yesterday' ? 'yesterday' : formatShort(date)}`;
+
+  function render() {
+    const day = getDay(date);
+    const w = day && day.weather;
+    const tooOld = diffDays(date, today) > MAX_PAST_DAYS;
+    const offline = typeof navigator !== 'undefined' && navigator.onLine === false;
+    const children = [];
+    if (w) {
+      children.push(h('ul', { class: 'weather-card' }, ...describeWeather(w).map(l => h('li', null, l))));
+      children.push(p(`Fetched ${w.fetchedAt ? w.fetchedAt.slice(11, 16) + ' on ' + formatShort(w.fetchedAt.slice(0, 10)) : ''} for ${w.lat}, ${w.lon} from Open-Meteo.`, 'inline-note'));
+      children.push(h('div', { class: 'btn-row' },
+        h('button', { class: 'btn', type: 'button', disabled: offline, onclick: () => run(true) }, 'Refresh'),
+        h('button', { class: 'btn quiet', type: 'button', onclick: () => updateDay(date, d => { d.weather = null; }) }, 'Remove')));
+    } else if (tooOld) {
+      children.push(p(`Weather can be fetched for the last ${MAX_PAST_DAYS} days only.`, 'explain'));
+    } else {
+      children.push(h('button', { class: 'btn big', type: 'button', disabled: offline, onclick: () => run(false) }, offline ? 'Offline – weather needs a connection' : label));
+      children.push(p('Sends your location (rounded to about 1 km) and the date to Open-Meteo, a free weather service, and nothing else. Pressure, humidity, sunshine, temperature, rain, PM2.5 and pollen (where available) are saved with the day and tested as triggers.', 'explain'));
+    }
+    replaceChildren(body, ...children);
+  }
+
+  async function run(refresh) {
+    const btn = body.querySelector('button');
+    if (btn) { btn.disabled = true; btn.textContent = 'Fetching…'; }
+    try {
+      const loc = await getLocation(state.settings);
+      if (!loc.fromSaved) await saveSettings({ lastLocation: { lat: loc.lat, lon: loc.lon, at: loc.at } });
+      const w = await fetchWeather({ lat: loc.lat, lon: loc.lon, date });
+      updateDay(date, d => { d.weather = w; });
+      toast(loc.fromSaved ? 'Weather saved (using your last known location)' : 'Weather saved');
+    } catch (err) {
+      toast(err && err.message ? err.message : 'Could not fetch the weather. Try again later.', 6000);
+    }
+    render();
+  }
+
+  render();
+  sec.cleanupWeather = on('daychange', e => { if (e.detail.date === date || e.detail.date == null) render(); });
+  return sec;
 }
 
 /* ---------- Flags and note ---------- */

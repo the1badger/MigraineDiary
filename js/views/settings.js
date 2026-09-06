@@ -3,7 +3,7 @@
 
 import { state, saveSettings, replaceAll, eraseAll } from '../state.js';
 import { h, p, tickRow, segmented, toast, confirmDialog, infoDialog, promptDialog, plural, isIOS, isStandalone, formatPct } from '../ui.js';
-import { FIELDS, DAY_FLAGS, GROUPS, GROUP_LABELS, medClass, defaultSettings } from '../fields.js';
+import { FIELDS, DAY_FLAGS, GROUPS, GROUP_LABELS, WEATHER_FIELDS, medClass, defaultSettings } from '../fields.js';
 import { exportBackup, prepareImport, commitImport } from '../export.js';
 import { generateDemo, DEMO_TRIGGER, DEMO_DECOY } from '../demo.js';
 import { store } from '../store.js';
@@ -25,6 +25,7 @@ export function renderSettings() {
   root.appendChild(medicineSection(s));
   root.appendChild(appearanceSection(s));
   root.appendChild(reminderSection(s));
+  root.appendChild(weatherSection(s));
   root.appendChild(backupSection(s));
   root.appendChild(storageSection(s));
   root.appendChild(demoSection(s));
@@ -111,7 +112,8 @@ function builtinSection(s) {
   const hidden = new Set(s.hiddenBuiltins);
   const all = [...FIELDS.filter(f => f.group !== 'meds').map(f => ({ key: f.key, label: (f.subgroup ? `${f.subgroup}: ` : '') + f.label + (f.hint ? ` (${f.hint})` : ''), group: GROUP_LABEL[f.group] })),
     ...DAY_FLAGS.map(f => ({ key: f.key, label: f.label, group: GROUP_LABEL.meds })),
-    ...FIELDS.filter(f => f.group === 'meds').map(f => ({ key: f.key, label: `${f.subgroup}: ${f.label}`, group: GROUP_LABEL.meds }))];
+    ...FIELDS.filter(f => f.group === 'meds').map(f => ({ key: f.key, label: `${f.subgroup}: ${f.label}`, group: GROUP_LABEL.meds })),
+    ...WEATHER_FIELDS.map(f => ({ key: f.key, label: `${f.label} (from the weather fetch)`, group: GROUP_LABEL.weather }))];
   let lastGroup = null;
   for (const f of all) {
     if (f.group !== lastGroup) { sec.appendChild(h('h3', null, f.group)); lastGroup = f.group; }
@@ -129,9 +131,12 @@ function builtinSection(s) {
 function thresholdSection(s) {
   const sec = h('div', { class: 'group' }, h('h2', null, 'What counts as "yes"'),
     p('Numbers become yes/no for the analysis at these cut-offs. Change them to suit you; the analysis re-runs instantly.', 'explain'));
-  for (const f of FIELDS.filter(f => f.threshold)) {
+  const withThreshold = [...FIELDS.filter(f => f.threshold), ...WEATHER_FIELDS];
+  let weatherHeading = false;
+  for (const f of withThreshold) {
+    if (WEATHER_FIELDS.includes(f) && !weatherHeading) { sec.appendChild(h('h3', null, 'From the weather fetch')); weatherHeading = true; }
     const input = h('input', { type: 'number', value: s.thresholds[f.key], step: f.step || 1, min: f.min ?? 0, max: f.max ?? 10, 'aria-label': `Cut-off for ${f.label}` });
-    const desc = h('div', { class: 'desc' }, f.label, h('small', { class: 'muted' }, f.analysisLabel(s.thresholds[f.key])));
+    const desc = h('div', { class: 'desc' }, f.label + (f.unit && WEATHER_FIELDS.includes(f) ? ` (${f.unit})` : ''), h('small', { class: 'muted' }, f.analysisLabel(s.thresholds[f.key])));
     input.addEventListener('change', async () => {
       const v = Number(input.value);
       if (!Number.isFinite(v)) return;
@@ -213,6 +218,25 @@ function reminderSection(s) {
   } }));
   sec.appendChild(status);
   if (isIOS() && !isStandalone()) sec.appendChild(p('On an iPhone, notifications only work once the app is added to the Home Screen (iOS 16.4 or later).', 'explain'));
+  return sec;
+}
+
+/* ---------- Weather ---------- */
+
+function weatherSection(s) {
+  const sec = h('div', { class: 'group' }, h('h2', null, 'Weather and air'),
+    p('The "Fetch weather" button on the Today screen asks Open-Meteo (a free service, no account) for the day\'s pressure, humidity, sunshine, temperature, rain, PM2.5 and pollen. It is the only time the app uses the network after loading, and only your location rounded to about 1 km plus the date are sent. Pollen is available in Europe only.', 'explain'));
+  const loc = s.lastLocation;
+  sec.appendChild(h('div', { class: 'kv' }, h('span', null, 'Last location used'),
+    h('span', null, loc ? `${loc.lat}, ${loc.lon}${loc.at ? ` (${formatMedium(loc.at.slice(0, 10))})` : ''}` : 'None yet')));
+  if (loc) {
+    sec.appendChild(h('div', { class: 'btn-row' }, h('button', { class: 'btn', type: 'button', onclick: async () => {
+      await saveSettings({ lastLocation: null });
+      toast('Location forgotten');
+      rerender();
+    } }, 'Forget location')));
+  }
+  sec.appendChild(p('The phone\'s location is asked for each time you tap the button; the last position is kept only so the fetch still works when location access is refused or unavailable. Cut-offs for the weather triggers are in "What counts as yes" above.', 'explain'));
   return sec;
 }
 
@@ -335,7 +359,7 @@ function dangerSection() {
 
 function aboutSection() {
   return h('div', { class: 'group' }, h('h2', null, 'About'),
-    p('Migraine Diary keeps everything on this device. It makes no network requests after it has loaded, has no account and sends nothing anywhere.', 'explain'),
+    p('Migraine Diary keeps everything on this device. After loading it makes no network requests except the weather fetch you trigger yourself, has no account and sends nothing else anywhere.', 'explain'),
     h('div', { class: 'btn-row' }, h('a', { class: 'btn', href: '#/help' }, 'How the analysis works')));
 }
 

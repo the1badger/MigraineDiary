@@ -38,6 +38,8 @@ export function csvHeaders(days, settings) {
   for (const f of FIELDS) cols.push(f.unit ? `${f.label} (${f.unit === 'h' ? 'hours' : f.unit === 'L' ? 'litres' : f.unit === 'min' ? 'minutes' : f.unit})` : f.label);
   for (const n of customNames(days, settings)) cols.push(n);
   for (const fl of DAY_FLAGS) cols.push(fl.label);
+  cols.push('Pressure min (hPa)', 'Pressure max (hPa)', 'Pressure change since day before (hPa)', 'Humidity mean (%)', 'Sunshine (hours)',
+    'Temperature max (°C)', 'Temperature min (°C)', 'Rain (mm)', 'PM2.5 max (µg/m³)', 'Pollen max (grains/m³)');
   cols.push('Attack 1 start', 'Attack 1 end', 'Attack 1 still going', 'Attack 1 peak severity', 'Attack 1 aura', 'Attack 1 side',
     'Attack 1 nausea', 'Attack 1 light sensitivity', 'Attack 1 sound sensitivity', 'Attack 1 neck pain', 'Attack 1 medicines',
     'Attack 1 worked within 2 h', 'Attack 1 lost the day', 'Note', 'Last edited');
@@ -62,6 +64,9 @@ export function toCSV(days, settings) {
     for (const f of FIELDS) row.push(ex[f.key] == null ? null : ex[f.key]);
     for (const n of customs) row.push(ex.custom && ex.custom[n] != null ? !!ex.custom[n] : null);
     for (const fl of DAY_FLAGS) row.push(!!d[fl.key]);
+    const w = d.weather || {};
+    row.push(w.pressureMin ?? null, w.pressureMax ?? null, w.pressureChange ?? null, w.humidityMean ?? null, w.sunshineHours ?? null,
+      w.tempMax ?? null, w.tempMin ?? null, w.rainMm ?? null, w.pm25Max ?? null, w.pollenMax ?? null);
     if (a) {
       row.push(a.start, a.end, a.ongoing, a.peakSeverity, a.aura, a.side, a.nausea, a.lightSensitivity, a.soundSensitivity, a.neckPain,
         a.acuteMeds.map(m => `${m.name} x${m.doses}`).join('; '), a.workedWithin2h, a.lostDay);

@@ -35,6 +35,9 @@ export function renderHelp() {
       li('It cannot handle small numbers well. With four attacks a month even a real two-day trigger can take three to six months to show. The gates are deliberately strict.'),
       li('It does not model several factors at once. Each exposure is tested on its own.')),
 
+    h('h2', null, 'Weather and air'),
+    p('Tap "Fetch today\'s weather" on the Today screen to save the day\'s air pressure (lowest, highest, and the change since the day before), humidity, sunshine hours, temperature, rain, PM2.5 and, in Europe, pollen. Each becomes a yes/no trigger at a cut-off you can change in Settings, so "pressure fell 5 hPa or more since yesterday" is tested at the same lags as everything else. It works for any day in the last 90 days, so a day filled in late still gets its weather.'),
+
     h('h2', null, 'Monthly counts and the noise band'),
     p('Month-to-month, the number of migraine days wobbles by roughly the square root of the count just by chance. The shaded band on Trends shows that range. Only a change bigger than the band in a single month, or a smaller change that lasts two or three months, is likely to be real. A single good month, on a new medicine or a new diet, proves nothing yet.'),
 
@@ -43,7 +46,7 @@ export function renderHelp() {
 
     h('h2', null, 'Privacy and safety of your data'),
     h('ul', null,
-      li('Everything is stored on this device, in the browser’s own database. There is no account, no server and no analytics. After the first load the app makes no network requests at all; it works in airplane mode.'),
+      li('Everything is stored on this device, in the browser’s own database. There is no account, no server and no analytics. After the first load the app makes no network requests except one you trigger yourself: the "Fetch weather" button sends your location (rounded to about 1 km) and the date to Open-Meteo, a free weather service. Everything else works in airplane mode.'),
       li('That also means there is no copy anywhere else. Export a backup (Settings) every couple of weeks and keep it in Files, Drive or an email to yourself.'),
       li('On an iPhone, Safari can delete a website’s stored data after 7 days without use unless the app is added to the Home Screen. Add it. The app reminds you once, and nags for a backup after 14 days.'),
       li('The export is not encrypted. Anyone who can open the file can read it.')),

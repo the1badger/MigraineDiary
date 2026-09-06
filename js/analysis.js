@@ -11,7 +11,7 @@
 //   Lag L = exposure on d, outcome on d+L, for L in 0..3.
 //   Windows: exposure on any of the previous 2 (or 3) days, outcome on d.
 
-import { FIELDS, DERIVED, isMigraineDay, acuteMedDay, normaliseDay } from './fields.js';
+import { FIELDS, DERIVED, WEATHER_FIELDS, isMigraineDay, acuteMedDay, normaliseDay } from './fields.js';
 import { addDays, diffDays, monthKey, localMinuteToMs, hoursBetween, dateRange, daysInMonth } from './dates.js';
 
 export const LAGS = [0, 1, 2, 3];
@@ -82,6 +82,11 @@ export function exposureDefinitions(settings) {
     const t = settings.thresholds && settings.thresholds[f.key] != null ? settings.thresholds[f.key] : (f.threshold ? f.threshold.default : null);
     defs.push({ key: f.key, label: f.analysisLabel ? f.analysisLabel(t) : f.label, kind: 'builtin', field: f, threshold: t, group: f.group });
   }
+  for (const f of WEATHER_FIELDS) {
+    if (hidden.has(f.key)) continue;
+    const t = settings.thresholds && settings.thresholds[f.key] != null ? settings.thresholds[f.key] : f.threshold.default;
+    defs.push({ key: f.key, label: f.analysisLabel(t), kind: 'weather', field: f, threshold: t, group: 'weather' });
+  }
   for (const d of DERIVED) {
     const parts = d.of.filter(k => !hidden.has(k)).map(k => FIELDS.find(f => f.key === k)).filter(Boolean);
     if (parts.length < 2) continue;      // a composite of one box is just that box
@@ -100,6 +105,12 @@ export function exposureValue(day, def) {
   const ex = day.exposures || {};
   if (def.kind === 'derived') {
     return def.parts.some(f => ex[f.key]) ? 1 : 0;
+  }
+  if (def.kind === 'weather') {
+    if (!day.weather) return null;
+    const v = def.field.get(day.weather);
+    if (v == null || !Number.isFinite(Number(v))) return null;
+    return applyThreshold(def.field.threshold.op, Number(v), def.threshold);
   }
   if (def.kind === 'custom') {
     if (def.since && day.date < def.since) return null;

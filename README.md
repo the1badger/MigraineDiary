@@ -2,7 +2,7 @@
 
 A private, offline daily journal for people with migraine. Tick a few boxes once a day; over weeks the app shows, in plain English, which logged exposures were followed by attacks more often than chance, **including exposures one, two or three days before the attack**.
 
-- Everything stays on your phone. No account, no server, no analytics, no network requests after the first load.
+- Everything stays on your phone. No account, no server, no analytics, and no network requests after the first load except the weather fetch you trigger yourself.
 - Installs to the Home Screen as a web app (iPhone Safari, Android Chrome) and also works on a desktop browser.
 - A normal day takes under a minute to log; an attack takes a few taps.
 - Export and import from day one, with reminders to back up.
@@ -65,6 +65,10 @@ This matters on iOS: Safari can delete a website's stored data after 7 days with
 
 Chrome and Edge show an install icon in the address bar. Firefox and Safari run it as a normal tab.
 
+## Weather and air
+
+The **Fetch today's weather** button on the Today screen (also available when back-filling any of the last 90 days) asks [Open-Meteo](https://open-meteo.com), a free service with no account or key, for the day's air pressure (min, max and change since the day before), humidity, sunshine hours, temperature, rain, PM2.5 and pollen. The request carries only your location rounded to about 1 km and the date. Each figure becomes a yes/no trigger at an editable cut-off (Settings → What counts as "yes"), so "pressure fell 5 hPa or more since yesterday" is analysed at the same lags as any tick box. Pollen is only available in Europe; elsewhere the card says so. Nothing is fetched unless you tap the button, and the app works offline as before.
+
 ## Backups
 
 Your diary exists only on the device you log on. **Settings → Backup and export**:
@@ -109,6 +113,7 @@ js/export.js            JSON/CSV export, import with merge
 js/demo.js              seeded synthetic diary generator (also used by tests)
 js/banners.js           update / Add-to-Home-Screen / backup banners
 js/reminders.js         best-effort daily notification
+js/weather.js           Open-Meteo fetch and normalisation (the only network call)
 js/views/*.js           one file per screen
 tests/*.test.js         node --test
 icons/                  app icons (regenerate with python icons/make_icons.py)

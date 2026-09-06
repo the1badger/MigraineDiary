@@ -25,7 +25,7 @@ export const DEMO_DECOY = 'aged cheese';
 // result about a third of the time (six tests per exposure at p < 0.10), so the seed
 // was chosen so that the decoy reads "no signal" and the trigger is clearly strongest
 // two days later. Other seeds are exercised by the tests.
-export const DEMO_SEED = 1;
+export const DEMO_SEED = 6;
 
 /**
  * generateDemo(options) -> { days, settings }
@@ -55,6 +55,7 @@ export function generateDemo({
   let prevAttackEnd = null;   // local minute string of the last attack's end
   let prevAttackEndMs = null;
   let lastAttackIndex = -10;  // for the refractory period after an attack
+  let pressure = 1016;        // slow random walk for the synthetic weather
 
   for (let i = 0; i < days; i++) {
     const date = addDays(startDate, i);
@@ -148,6 +149,23 @@ export function generateDemo({
       prevAttackEndMs = endMs;
     }
 
+    // Synthetic weather on most days, as if the button had been tapped.
+    const prevPressure = pressure;
+    pressure = Math.max(985, Math.min(1040, pressure + (rnd() - 0.5) * 8));
+    if (chance(0.85)) {
+      const swing = 2 + rnd() * 8;
+      const tempMax = Math.round((18 + rnd() * 14) * 10) / 10;
+      day.weather = {
+        source: 'open-meteo', fetchedAt: `${date}T20:30:00+00:00`, lat: -28.64, lon: 153.61,
+        pressureMin: Math.round((pressure - swing / 2) * 10) / 10, pressureMax: Math.round((pressure + swing / 2) * 10) / 10,
+        pressureMean: Math.round(pressure * 10) / 10, pressureChange: (Math.round((pressure - prevPressure) * 10) / 10) || 0,
+        humidityMean: Math.round(50 + rnd() * 45), humidityMax: Math.round(70 + rnd() * 30),
+        sunshineHours: Math.round(rnd() * 11 * 10) / 10, tempMax, tempMin: Math.round((tempMax - 6 - rnd() * 8) * 10) / 10,
+        rainMm: chance(0.3) ? Math.round(rnd() * 25 * 10) / 10 : 0,
+        pm25Max: Math.round((4 + rnd() * 20) * 10) / 10, pm25Mean: null, pollen: null, pollenMax: null,
+        airQualityAvailable: true, hasWeather: true,
+      };
+    }
     day.updatedAt = `${date}T21:00:00+00:00`;
     if (chance(0.3)) day.note = pick(['Long day.', 'Late night.', 'Slept badly.', 'Busy at work.', 'Quiet day.', 'Drove to the coast.']);
 

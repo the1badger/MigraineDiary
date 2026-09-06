@@ -7,7 +7,7 @@
 // "Update available – reload" and posts SKIP_WAITING when the user agrees.
 // Old caches are deleted on activate.
 
-const VERSION = '1.2.0';
+const VERSION = '1.3.0';
 const CACHE = `migraine-diary-${VERSION}`;
 const SHELL = [
   './',
@@ -26,6 +26,7 @@ const SHELL = [
   './js/state.js',
   './js/store.js',
   './js/ui.js',
+  './js/weather.js',
   './js/views/attack.js',
   './js/views/calendar.js',
   './js/views/help.js',

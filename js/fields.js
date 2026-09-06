@@ -88,7 +88,33 @@ export const DERIVED = [
 ];
 
 /** Labels for every group, including the one rendered under Medicines and notes. */
-export const GROUP_LABELS = { sleep: 'Sleep and body', food: 'Food and drink', env: 'Environment and neck', meds: 'Medicines and notes' };
+export const GROUP_LABELS = { sleep: 'Sleep and body', food: 'Food and drink', env: 'Environment and neck', meds: 'Medicines and notes', weather: 'Weather and air' };
+
+/**
+ * Figures fetched from the weather service (day.weather), each turned into a
+ * yes/no exposure at an editable cut-off. get(w) reads the figure; null means
+ * the provider had no value, and the day is excluded for that exposure.
+ */
+export const WEATHER_FIELDS = [
+  { key: 'wxPressureDrop', label: 'Pressure fall since the day before', unit: 'hPa', min: 1, max: 30, step: 1,
+    get: w => (w.pressureChange == null ? null : -w.pressureChange),
+    threshold: { op: '>=', default: 5 }, analysisLabel: t => `Pressure drop (${t}+ hPa since the day before)` },
+  { key: 'wxPressureSwing', label: 'Pressure swing within the day', unit: 'hPa', min: 1, max: 40, step: 1,
+    get: w => (w.pressureMax != null && w.pressureMin != null ? w.pressureMax - w.pressureMin : null),
+    threshold: { op: '>=', default: 8 }, analysisLabel: t => `Pressure swing (${t}+ hPa in a day)` },
+  { key: 'wxHumid', label: 'Average humidity', unit: '%', min: 30, max: 100, step: 5,
+    get: w => w.humidityMean, threshold: { op: '>=', default: 80 }, analysisLabel: t => `Humid (${t}%+ average)` },
+  { key: 'wxLowSun', label: 'Sunshine', unit: 'h', min: 0, max: 14, step: 0.5,
+    get: w => w.sunshineHours, threshold: { op: '<', default: 2 }, analysisLabel: t => `Little sunshine (under ${t} h)` },
+  { key: 'wxHot', label: 'Maximum temperature', unit: '°C', min: 15, max: 50, step: 1,
+    get: w => w.tempMax, threshold: { op: '>=', default: 30 }, analysisLabel: t => `Hot day (${t} °C+)` },
+  { key: 'wxRain', label: 'Rain', unit: 'mm', min: 0.5, max: 100, step: 0.5,
+    get: w => w.rainMm, threshold: { op: '>=', default: 5 }, analysisLabel: t => `Rainy day (${t}+ mm)` },
+  { key: 'wxPm25', label: 'Air pollution, PM2.5 daily peak', unit: 'µg/m³', min: 5, max: 200, step: 5,
+    get: w => w.pm25Max, threshold: { op: '>=', default: 25 }, analysisLabel: t => `Air pollution (PM2.5 ${t}+ µg/m³)` },
+  { key: 'wxPollen', label: 'Pollen, highest type', unit: 'grains/m³', min: 5, max: 500, step: 5,
+    get: w => w.pollenMax, threshold: { op: '>=', default: 50 }, analysisLabel: t => `High pollen (${t}+ grains/m³)` },
+];
 
 export const FIELD_BY_KEY = Object.fromEntries(FIELDS.map(f => [f.key, f]));
 
@@ -115,6 +141,7 @@ export function severityWord(s) {
 export function defaultSettings() {
   const thresholds = {};
   for (const f of FIELDS) if (f.threshold) thresholds[f.key] = f.threshold.default;
+  for (const f of WEATHER_FIELDS) thresholds[f.key] = f.threshold.default;
   return {
     id: 'settings',
     customExposures: [],                    // [{ name, group, hidden }]
@@ -126,6 +153,7 @@ export function defaultSettings() {
     reminderTime: '20:30',
     reminderEnabled: false,
     lastBackupAt: null,
+    lastLocation: null,                     // { lat, lon, at } rounded to ~1 km, used by the weather fetch
     challenges: [],                         // [{ id, exposure, date, cleanMorning }]
     iosBannerDismissed: false,
     firstRunAt: null,
@@ -175,6 +203,7 @@ export function emptyDay(date) {
     preventiveTaken: false,
     acuteMedsOtherHeadache: false,
     note: '',
+    weather: null,
   };
 }
 
@@ -189,6 +218,7 @@ export function normaliseDay(raw) {
   d.preventiveTaken = !!d.preventiveTaken;
   d.acuteMedsOtherHeadache = !!d.acuteMedsOtherHeadache;
   d.note = typeof d.note === 'string' ? d.note : '';
+  d.weather = d.weather && typeof d.weather === 'object' ? d.weather : null;
   return d;
 }
 
